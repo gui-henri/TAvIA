@@ -65,10 +65,10 @@ def gerar_populacao(n_individuos, tam_individuo, media_demanda=50):
     return populacao
 
 # obtem de cada indivíduo o ponto de reposição e tamanho do lote
-def avaliar_individuos(populacao, a = 0.5, b = 0.5):
+def avaliar_individuos(populacao, a = 0.5, b = 0.5, media_demanda=50, desvio_demanda=10, media_lead=5, desvio_lead=1, estoque_inicial=15):
     for individuo in populacao:
         ponto_reposicao, tamanho_lote = pedacos_individuo(individuo)
-        demanda_atendida, total_demanda, media_demanda, media_estoque = simular(ponto_reposicao, tamanho_lote)
+        demanda_atendida, total_demanda, media_demanda, media_estoque = simular(ponto_reposicao, tamanho_lote, media_demanda, desvio_demanda, media_lead, desvio_lead, estoque_inicial)
         individuo.aptidao = func_objetivo(
                     a=a, 
                     b=b, 
@@ -153,7 +153,7 @@ def elitismo(populacao, filhos):
     populacao = filhos
 
 
-def alg_gen(tam_populacao, n_geracoes, tam_cromossomo, taxa_mutacao):
+def alg_gen(tam_populacao, n_geracoes, tam_cromossomo, taxa_mutacao, a=0.5, b=0.5, media_demanda=50, desvio_demanda=10, media_lead=5, desvio_lead=2, estoque_inicial=15):
     populacao = gerar_populacao(tam_populacao, tam_cromossomo)
     avaliar_individuos(populacao)
 
@@ -171,22 +171,43 @@ def alg_gen(tam_populacao, n_geracoes, tam_cromossomo, taxa_mutacao):
     return melhor_individuo
 
 if __name__ == "__main__":
+    parametros = []
+    with open('dados.txt', 'r') as f:
+        linhas = f.readlines()
+
+        # Processar as linhas do arquivo
+        for linha in linhas:
+            parametros.append(linha.strip())
+        # Fechar o arquivo
+        f.close()
+
     print('Irei rodar o algoritmo genético com os determinados parâmetros: ')
-    print('Tamanho da população: 100')
-    print('Número de gerações: 100')
-    print('Tamanho do Cromossomo: 22')
-    print('Taxa de mutação: 10%')
-    print('a: 0.5')
-    print('b: 0.5')
-    print('Media demanda: 50')
-    print('Desvio demanda: 10')
-    print('Media lead: 5')
-    print('Desvio lead: 1')
-    print('Estoque inicial: 15')
+    pop_size = int(parametros[0])
+    print(f'Tamanho da população: {pop_size}')
+    n_geracoes = int(parametros[1])
+    print(f'Número de gerações: {n_geracoes}')
+    tam_cromossomo = int(parametros[2])
+    print(f'Tamanho do Cromossomo: {tam_cromossomo}')
+    taxa_mutacao = float(parametros[3])
+    print(f'Taxa de mutação: {taxa_mutacao * 100}%')
+    a = float(parametros[4])
+    print(f'a: {a}')
+    b = float(parametros[5])
+    print(f'b: {b}')
+    media_demanda = int(parametros[6])
+    print(f'Media demanda: {media_demanda}')
+    desvio_demanda = int(parametros[7])
+    print(f'Desvio demanda: {desvio_demanda}')
+    media_lead = int(parametros[8])
+    print(f'Media lead: {media_lead}')
+    desvio_lead = int(parametros[9])
+    print(f'Desvio lead: {desvio_lead}')
+    estoque_inicial = int(parametros[10])
+    print(f'Estoque inicial: {estoque_inicial}')
     resp = input('Prosseguir? Y/n')
     if resp == 'y' or resp == 'Y':
-        ind = alg_gen(100, 100, 22, 0.1)
+        ind = alg_gen(pop_size, n_geracoes, tam_cromossomo, taxa_mutacao, a, b, media_demanda, desvio_demanda, media_lead, desvio_lead, estoque_inicial)
         ponto_reposicao, tamanho_lote = pedacos_individuo(ind)
         print(f'O melhor indivíduo diz que o ponto de reposição deve ser: {ponto_reposicao}')
         print(f'O melhor indivíduo diz que o tamanho do lote deve ser: {tamanho_lote}')
-        print(f'Sua aptidão: {ind.aptidao}')
+        print(f'Sua aptidao: {ind.aptidao}')
